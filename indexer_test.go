@@ -25,7 +25,7 @@ func tearUp(t *testing.T) *testEnv {
 	ctrl := gomock.NewController(t)
 
 	clctr := mock.NewMockCollecter(ctrl)
-	handler := Handler(func(tp ticker.TickerPrice) { t.Log(tp) })
+	handler := Handler(func(tp ticker.Price) { t.Log(tp) })
 
 	idxer, err := NewIndexer(clctr, handler, time.Minute)
 	require.NoError(t, err)
@@ -45,7 +45,7 @@ func TestNewIndexer(t *testing.T) {
 	t.Run("invalid collecter", func(t *testing.T) {
 		got, err := NewIndexer(
 			nil,
-			func(tp ticker.TickerPrice) { t.Log(tp) },
+			func(tp ticker.Price) { t.Log(tp) },
 			time.Minute,
 		)
 
@@ -74,7 +74,7 @@ func TestNewIndexer(t *testing.T) {
 		defer ctrl.Finish()
 
 		clctr := mock.NewMockCollecter(ctrl)
-		handler := Handler(func(tp ticker.TickerPrice) { t.Log(tp) })
+		handler := Handler(func(tp ticker.Price) { t.Log(tp) })
 
 		got, err := NewIndexer(
 			clctr,
@@ -131,7 +131,7 @@ func TestIndexer_Stop(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
 
-		env.idxer.Stop(ctx)
+		err = env.idxer.Stop(ctx)
 		assert.NoError(t, err)
 	})
 
@@ -169,7 +169,7 @@ func TestIndexer_Start(t *testing.T) {
 		defer tearDown(env)
 
 		called := false
-		env.idxer.handle = func(_ ticker.TickerPrice) {
+		env.idxer.handle = func(_ ticker.Price) {
 			called = true
 		}
 
@@ -281,7 +281,7 @@ func TestIndexer_index(t *testing.T) {
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
 
-		env.collecter.EXPECT().Collect(ctx).Return([]*ticker.TickerPrice{
+		env.collecter.EXPECT().Collect(ctx).Return([]*ticker.Price{
 			{
 				Ticker: ticker.BTCUSDTicker,
 				Time:   time.Now(),
@@ -300,15 +300,15 @@ func TestIndexer_index(t *testing.T) {
 
 		now := time.Now().UTC()
 
-		var got []ticker.TickerPrice
-		env.idxer.handle = func(tp ticker.TickerPrice) {
+		var got []ticker.Price
+		env.idxer.handle = func(tp ticker.Price) {
 			got = append(got, tp)
 		}
 
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
 
-		env.collecter.EXPECT().Collect(ctx).Return([]*ticker.TickerPrice{
+		env.collecter.EXPECT().Collect(ctx).Return([]*ticker.Price{
 			{
 				Ticker: ticker.BTCUSDTicker,
 				Time:   now,
@@ -325,7 +325,7 @@ func TestIndexer_index(t *testing.T) {
 
 		require.NoError(t, err)
 
-		expected := []ticker.TickerPrice{
+		expected := []ticker.Price{
 			{
 				Ticker: ticker.BTCUSDTicker,
 				Time:   now,

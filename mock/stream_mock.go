@@ -36,10 +36,10 @@ func (m *MockStream) EXPECT() *MockStreamMockRecorder {
 }
 
 // Get mocks base method.
-func (m *MockStream) Get(ctx context.Context) (*ticker.TickerPrice, error) {
+func (m *MockStream) Get(ctx context.Context) (*ticker.Price, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", ctx)
-	ret0, _ := ret[0].(*ticker.TickerPrice)
+	ret0, _ := ret[0].(*ticker.Price)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

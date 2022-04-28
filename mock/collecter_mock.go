@@ -36,10 +36,10 @@ func (m *MockCollecter) EXPECT() *MockCollecterMockRecorder {
 }
 
 // Collect mocks base method.
-func (m *MockCollecter) Collect(ctx context.Context) ([]*ticker.TickerPrice, error) {
+func (m *MockCollecter) Collect(ctx context.Context) ([]*ticker.Price, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Collect", ctx)
-	ret0, _ := ret[0].([]*ticker.TickerPrice)
+	ret0, _ := ret[0].([]*ticker.Price)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

@@ -10,7 +10,7 @@ import (
 
 // Collecter collects all ticker prices.
 type Collecter interface {
-	Collect(ctx context.Context) ([]*ticker.TickerPrice, error)
+	Collect(ctx context.Context) ([]*ticker.Price, error)
 }
 
 type StreamCollecter struct {
@@ -25,9 +25,9 @@ func NewStreamCollecter(streams []stream.Stream) *StreamCollecter {
 }
 
 // Collect returns all data from streams.
-func (c *StreamCollecter) Collect(ctx context.Context) ([]*ticker.TickerPrice, error) {
+func (c *StreamCollecter) Collect(ctx context.Context) ([]*ticker.Price, error) {
 	g, ctx := errgroup.WithContext(ctx)
-	prices := make([]*ticker.TickerPrice, len(c.streams))
+	prices := make([]*ticker.Price, len(c.streams))
 	for i, s := range c.streams {
 		i, s := i, s
 		g.Go(func() error {

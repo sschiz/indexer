@@ -14,13 +14,13 @@ import (
 func TestNewChanStream(t *testing.T) {
 	t.Run("nillable", func(t *testing.T) {
 		errs := make(chan error)
-		ticker := make(chan ticker.TickerPrice)
+		tick := make(chan ticker.Price)
 
 		stream, err := NewChanStream(nil, errs)
 		require.Nil(t, stream)
 		assert.ErrorIs(t, err, ErrInvalidChannel)
 
-		stream, err = NewChanStream(ticker, nil)
+		stream, err = NewChanStream(tick, nil)
 		require.Nil(t, stream)
 		assert.ErrorIs(t, err, ErrInvalidChannel)
 
@@ -31,11 +31,11 @@ func TestNewChanStream(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		errs := make(chan error)
-		ticker := make(chan ticker.TickerPrice)
+		tick := make(chan ticker.Price)
 
-		stream, err := NewChanStream(ticker, errs)
+		stream, err := NewChanStream(tick, errs)
 		require.NoError(t, err)
-		assert.Equal(t, &ChanStream{errors: errs, ticker: ticker}, stream)
+		assert.Equal(t, &ChanStream{errors: errs, ticker: tick}, stream)
 	})
 }
 
@@ -44,9 +44,9 @@ func TestChanStream_Get(t *testing.T) {
 		now := time.Now()
 
 		errs := make(chan error)
-		tick := make(chan ticker.TickerPrice, 1)
+		tick := make(chan ticker.Price, 1)
 
-		tick <- ticker.TickerPrice{
+		tick <- ticker.Price{
 			Ticker: ticker.BTCUSDTicker,
 			Time:   now,
 			Price:  "test",
@@ -60,7 +60,7 @@ func TestChanStream_Get(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(
 			t,
-			&ticker.TickerPrice{
+			&ticker.Price{
 				Ticker: ticker.BTCUSDTicker,
 				Time:   now,
 				Price:  "test",
@@ -71,14 +71,14 @@ func TestChanStream_Get(t *testing.T) {
 
 	t.Run("error returned", func(t *testing.T) {
 		errs := make(chan error, 1)
-		ticker := make(chan ticker.TickerPrice)
+		tick := make(chan ticker.Price)
 
 		expected := errors.New("any error")
 		errs <- expected
 
-		stream, err := NewChanStream(ticker, errs)
+		stream, err := NewChanStream(tick, errs)
 		require.NoError(t, err)
-		require.Equal(t, &ChanStream{errors: errs, ticker: ticker}, stream)
+		require.Equal(t, &ChanStream{errors: errs, ticker: tick}, stream)
 
 		price, err := stream.Get(context.Background())
 		require.Nil(t, price)
@@ -87,11 +87,11 @@ func TestChanStream_Get(t *testing.T) {
 
 	t.Run("DeadlineExceeded returned", func(t *testing.T) {
 		errs := make(chan error)
-		ticker := make(chan ticker.TickerPrice)
+		tick := make(chan ticker.Price)
 
-		stream, err := NewChanStream(ticker, errs)
+		stream, err := NewChanStream(tick, errs)
 		require.NoError(t, err)
-		require.Equal(t, &ChanStream{errors: errs, ticker: ticker}, stream)
+		require.Equal(t, &ChanStream{errors: errs, ticker: tick}, stream)
 
 		ctx, cancel := context.WithDeadline(context.Background(), time.Now())
 		defer cancel()

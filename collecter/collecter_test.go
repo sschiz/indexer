@@ -35,9 +35,9 @@ func TestStreamCollecter_Collect(t *testing.T) {
 		s2 := mock.NewMockStream(ctrl)
 		s3 := mock.NewMockStream(ctrl)
 
-		s1.EXPECT().Get(gomock.Any()).Return(&ticker.TickerPrice{}, nil)
+		s1.EXPECT().Get(gomock.Any()).Return(&ticker.Price{}, nil)
 		s2.EXPECT().Get(gomock.Any()).Return(nil, expected)
-		s3.EXPECT().Get(gomock.Any()).Return(&ticker.TickerPrice{}, nil)
+		s3.EXPECT().Get(gomock.Any()).Return(&ticker.Price{}, nil)
 
 		collecter := NewStreamCollecter([]stream.Stream{s1, s2, s3})
 		prices, err := collecter.Collect(ctx)
@@ -51,7 +51,7 @@ func TestStreamCollecter_Collect(t *testing.T) {
 
 		ctx := context.Background()
 
-		expected := []*ticker.TickerPrice{
+		expected := []*ticker.Price{
 			{
 				Ticker: ticker.BTCUSDTicker,
 				Time:   time.Now(),

@@ -13,7 +13,7 @@ import (
 	"go.uber.org/atomic"
 )
 
-type Handler func(ticker.TickerPrice)
+type Handler func(ticker.Price)
 
 var (
 	ErrInvalidHandler   = errors.New("invalid handler")
@@ -38,17 +38,17 @@ type Indexer struct {
 // NewIndexer returns new Indexer instance.
 // Handle is called for each indexed TickerPrice.
 // Interval is a period during which indexing will be carried out.
-func NewIndexer(collecter collecter.Collecter, handle Handler, interval time.Duration) (*Indexer, error) {
+func NewIndexer(clctr collecter.Collecter, handle Handler, interval time.Duration) (*Indexer, error) {
 	if handle == nil {
 		return nil, ErrInvalidHandler
 	}
 
-	if collecter == nil {
+	if clctr == nil {
 		return nil, ErrInvalidCollecter
 	}
 
 	return &Indexer{
-		collecter: collecter,
+		collecter: clctr,
 		done:      make(chan struct{}, 1),
 		started:   atomic.NewBool(false),
 		avgs:      make(map[ticker.Ticker]*avg),
@@ -89,19 +89,19 @@ func (i *Indexer) Err() error {
 }
 
 func (i *Indexer) start(ctx context.Context) {
-	ticker := time.NewTicker(i.interval)
-	defer ticker.Stop()
+	t := time.NewTicker(i.interval)
+	defer t.Stop()
 	defer i.started.Store(false)
 
-	errors := make(chan error)
+	errs := make(chan error)
 
 	for {
 		select {
-		case t := <-ticker.C:
+		case t := <-t.C:
 			go func() {
 				err := i.index(ctx, t)
 				if err != nil {
-					errors <- err
+					errs <- err
 					return
 				}
 			}()
@@ -112,12 +112,14 @@ func (i *Indexer) start(ctx context.Context) {
 				i.err = ctx.Err()
 			}
 			return
-		case err := <-errors:
+		case err := <-errs:
 			i.err = err
 			return
 		}
 	}
 }
+
+const bitSize = 64
 
 func (i *Indexer) index(ctx context.Context, t time.Time) error {
 	i.mu.Lock()
@@ -129,7 +131,7 @@ func (i *Indexer) index(ctx context.Context, t time.Time) error {
 	}
 
 	for _, price := range prices {
-		p, err := strconv.ParseFloat(price.Price, 64)
+		p, err := strconv.ParseFloat(price.Price, bitSize)
 		if err != nil {
 			return err
 		}
@@ -146,10 +148,10 @@ func (i *Indexer) index(ctx context.Context, t time.Time) error {
 	}
 
 	for k, v := range i.avgs {
-		i.handle(ticker.TickerPrice{
+		i.handle(ticker.Price{
 			Ticker: k,
 			Time:   t,
-			Price:  strconv.FormatFloat(v.Average(), 'f', -1, 64),
+			Price:  strconv.FormatFloat(v.Average(), 'f', -1, bitSize),
 		})
 	}
 
