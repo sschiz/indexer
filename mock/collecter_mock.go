@@ -2,7 +2,7 @@
 // Source: collecter.go
 
 // Package collecter is a generated GoMock package.
-package collecter
+package mock
 
 import (
 	context "context"

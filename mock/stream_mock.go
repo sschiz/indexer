@@ -2,7 +2,7 @@
 // Source: stream.go
 
 // Package indexer is a generated GoMock package.
-package stream
+package mock
 
 import (
 	context "context"

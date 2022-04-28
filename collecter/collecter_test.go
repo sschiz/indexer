@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/sschiz/indexer/mock"
 	"github.com/sschiz/indexer/stream"
 	"github.com/sschiz/indexer/ticker"
 	"github.com/stretchr/testify/assert"
@@ -17,7 +18,7 @@ func TestNewStreamCollecter(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	s := stream.NewMockStream(ctrl)
+	s := mock.NewMockStream(ctrl)
 	collecter := NewStreamCollecter([]stream.Stream{s})
 	assert.Equal(t, &StreamCollecter{streams: []stream.Stream{s}}, collecter)
 }
@@ -30,9 +31,9 @@ func TestStreamCollecter_Collect(t *testing.T) {
 		expected := errors.New("stream error")
 		ctx := context.Background()
 
-		s1 := stream.NewMockStream(ctrl)
-		s2 := stream.NewMockStream(ctrl)
-		s3 := stream.NewMockStream(ctrl)
+		s1 := mock.NewMockStream(ctrl)
+		s2 := mock.NewMockStream(ctrl)
+		s3 := mock.NewMockStream(ctrl)
 
 		s1.EXPECT().Get(gomock.Any()).Return(&ticker.TickerPrice{}, nil)
 		s2.EXPECT().Get(gomock.Any()).Return(nil, expected)
@@ -68,9 +69,9 @@ func TestStreamCollecter_Collect(t *testing.T) {
 			},
 		}
 
-		s1 := stream.NewMockStream(ctrl)
-		s2 := stream.NewMockStream(ctrl)
-		s3 := stream.NewMockStream(ctrl)
+		s1 := mock.NewMockStream(ctrl)
+		s2 := mock.NewMockStream(ctrl)
+		s3 := mock.NewMockStream(ctrl)
 
 		s1.EXPECT().Get(gomock.Any()).Return(expected[0], nil)
 		s2.EXPECT().Get(gomock.Any()).Return(expected[1], nil)
