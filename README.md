@@ -107,3 +107,6 @@ func (s *source) SubscribePriceStream(t ticker.Ticker) (<-chan ticker.Price, <-c
 }
 
 ```
+
+## Docs
+See https://pkg.go.dev/github.com/sschiz/indexer
