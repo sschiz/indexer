@@ -15,5 +15,5 @@ type Price struct {
 }
 
 type PriceStreamSubscriber interface {
-	SubscribePriceStream(Ticker) (chan Price, chan error)
+	SubscribePriceStream(Ticker) (<-chan Price, <-chan error)
 }
